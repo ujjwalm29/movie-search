@@ -18,7 +18,7 @@ file_path_vectorizer_overview = 'tfidf_vectorizer_overview.pkl'
 
 # Initialize TF-IDF Vectorizer for bigrams
 vectorizer_title = TfidfVectorizer(ngram_range=(1, 2))
-vectorizer_overview = TfidfVectorizer(ngram_range=(1, 2))
+vectorizer_overview = TfidfVectorizer(ngram_range=(1, 3))
 
 
 def lemmatize(text):
@@ -50,16 +50,7 @@ def create_tfidf_embeddings_title(df):
     # Preprocess titles
     df['processed_title'] = df['title'].apply(lambda x: lemmatize(x.lower() if isinstance(x, str) else x))
 
-    if os.path.exists(file_path_vectorizer) and os.path.getsize(file_path_vectorizer) > 0:
-        with open(file_path_vectorizer, 'rb') as file:
-            global vectorizer_title
-            vectorizer_title = pickle.load(file)
-            tfidf_matrix = pickle.load(file)
-    else:
-        tfidf_matrix = vectorizer_title.fit_transform(df['processed_title'])
-        with open(file_path_vectorizer, 'wb') as file:
-            pickle.dump(vectorizer_title, file)
-            pickle.dump(tfidf_matrix, file)
+    tfidf_matrix = vectorizer_title.fit_transform(df['processed_title'])
 
     return tfidf_matrix
 
@@ -68,16 +59,7 @@ def create_tfidf_embeddings_overview(df):
     # Preprocess titles
     df['processed_overview'] = df['overview'].apply(lambda x: lemmatize_and_remove_stop_words(x.lower() if isinstance(x, str) else x))
 
-    if os.path.exists(file_path_vectorizer_overview) and os.path.getsize(file_path_vectorizer_overview) > 0:
-        with open(file_path_vectorizer_overview, 'rb') as file:
-            global vectorizer_overview
-            vectorizer_overview = pickle.load(file)
-            tfidf_matrix = pickle.load(file)
-    else:
-        tfidf_matrix = vectorizer_overview.fit_transform(df['processed_overview'])
-        with open(file_path_vectorizer_overview, 'wb') as file:
-            pickle.dump(vectorizer_overview, file)
-            pickle.dump(tfidf_matrix, file)
+    tfidf_matrix = vectorizer_overview.fit_transform(df['processed_overview'])
 
     return tfidf_matrix
 

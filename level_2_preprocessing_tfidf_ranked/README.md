@@ -115,6 +115,7 @@ To do this, I added these lines of code in the search_and_rank function.
 Let's run it!
 
 ```
+Search query : the godfather
 Top 10 scores in similarities_title: [1.   0.59909386 0.58740975 0.4678763  0. 0. 0. 0. 0. 0. ]
 Top 10 scores in similarities_overview: [0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
 The operation took 0.0331578254699707 seconds.
@@ -139,7 +140,77 @@ The operation took 0.012663125991821289 seconds.
 Results : ['Man of Steel', 'Hands of Steel', 'Tears of Steel', 'Man of the World', 'Man of the Story', 'Man of the House', 'Man of the House', 'Man of the Year', 'Man of the Year', 'Man of Iron']
 ```
 
+Some observations : 
+- For "the godfather" the titles of the original movies match and give a non zero score. For everything else, including ALL overviews, the score is 0. This doesn't seem ideal.
+- For "godfather", ALL scores across title and overviews is zero. This is a big red flag.
+- For "god father", ALL titles are zero, 2 minor matches in overview.
+- For "Man of steel", 1 title has a perfect score. Additionally, we see matches across titles and overview.
 
+The above observations, especially point 2, are not ideal. Our search kinda sucks right now. What do you think is the problem?
+
+Well, remember that all the titles and overview are split into bigrams. It seems like since the term "godfather" is 1 word, the index does not contain any singular godfather terms.
+All the godfather words are combined with other words and present in the index (for example "the godfather").
+
+Let's try and fix it!
+
+### Step 2 : Fix it!
+
+We found out that the problem might be bigrams.
+
+I think we need to introduce unigrams in our index as well to match singular words across titles and overviews. The bigrams will help in precision but unigrams will help in recall. I would recommend you to read more about precision and recall.
+Precision means getting the "correct" results to bubble up, but "recall" ensures that _some_ relevant results appear.
+
+In the code, the vectorizers are defined as :
+```
+vectorizer_title = TfidfVectorizer(ngram_range=(2, 2))
+vectorizer_overview = TfidfVectorizer(ngram_range=(2, 2))
+```
+
+To introduce unigrams, we can modify them to : 
+```
+vectorizer_title = TfidfVectorizer(ngram_range=(1, 2))
+vectorizer_overview = TfidfVectorizer(ngram_range=(1, 2))
+```
+
+Let's run it again!
+
+```
+Search query : the godfather
+Top 10 scores in similarities_title: [1.         0.66247551 0.66247551 0.64448446 0.62934108 0.46799578 0.38333228 0.38103037 0.36944792 0.36282461]
+Top 10 scores in similarities_overview: [0.25168185 0.24899769 0.20350804 0.19688429 0.17867486 0.17221492 0.14695292 0.12873031 0.11081763 0.11031454]
+The operation took 0.021055221557617188 seconds.
+Results : ['The Godfather', 'Godfather', '3 Godfathers', 'The Godfather: Part II', 'The Godfather: Part III', 'Disco Godfather', 'The Godfather Trilogy: 1972-1990', 'Three Godfathers', 'The Last Godfather', 'Onimasa: A Japanese Godfather']
+
+Search query : godfather
+Top 10 scores in similarities_title: [1.         1.         0.66247551 0.57863615 0.55767786 0.543094 0.53206837 0.51714478 0.42695517 0.41692306]
+Top 10 scores in similarities_overview: [0.25168185 0.24899769 0.20350804 0.19688429 0.17867486 0.17221492 0.14695292 0.12873031 0.11081763 0.11031454]
+The operation took 0.018260955810546875 seconds.
+Results : ['Godfather', '3 Godfathers', 'Disco Godfather', 'The Godfather', 'Three Godfathers', 'Tokyo Godfathers', 'The Last Godfather', 'The New Godfathers', 'Onimasa: A Japanese Godfather', 'The Godfather: Part II']
+
+Search query : God father
+Top 10 scores in similarities_title: [0.74104612 0.67145413 0.43924807 0.38789902 0.38789902 0.3828382 0.3828382  0.37127401 0.35984171 0.34911632]
+Top 10 scores in similarities_overview: [0.24473007 0.1834853  0.13105711 0.12999122 0.12890206 0.12573952 0.12336889 0.10406436 0.10024817 0.09615167]
+The operation took 0.02110886573791504 seconds.
+Results : ['Father', 'Gods', 'The Father', "Fathers' Day", 'Our Father', "Father's Day", 'Our Fathers', 'Blood Father', 'Oh My God', 'Oh, God!']
+
+Search query : Man of Steel
+Top 10 scores in similarities_title: [1.    0.61627827 0.59264903 0.50981225 0.50981225 0.50981225 0.4278748  0.42537495 0.41562413 0.41562413]
+Top 10 scores in similarities_overview: [0.34236535 0.29691966 0.29250448 0.22912267 0.17738596 0.1712126 0.16460193 0.16349751 0.16194437 0.15840618]
+The operation took 0.019733905792236328 seconds.
+Results : ['Man of Steel', 'Hands of Steel', 'Steel', 'Tears of Steel', 'Steel', 'Steel', 'Max Steel', 'Man of the World', 'Man of the House', 'Man of the Story']
+```
+
+MUCH BETTER!
+
+- For "godfather", we have relevant results! All the movies shown have godfather in their titles.
+- For "the godfather", we lost a little bit of precision, but movies from "the godfather" franchise still appear in the top 10 results.
+- For "God father", we have matches for God and father, which is better than 10 random movies.
+- For "Man of Steel", results have changed but the rest of the superman movies didn't show up.
+
+
+For "Man of Steel", there seems to be a lot of matches for "Man of" or "Steel". Due to titles being short and how TF-IDF calculates scores, the titles are given a lot more importance than a small match in overview.
+
+I could try and fix it but trying out a few things and giving "weights" to the title score and overview score, but I think I'll stop for now. You win some, you lose some. Let's move onto the next level!
 
 
 
