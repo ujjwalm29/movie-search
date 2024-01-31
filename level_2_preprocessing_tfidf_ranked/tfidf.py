@@ -1,4 +1,3 @@
-import os
 import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem import WordNetLemmatizer
@@ -7,7 +6,6 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 from scripts import parser
 import numpy as np
-import pickle
 
 # Download required NLTK resources
 nltk.download('punkt')

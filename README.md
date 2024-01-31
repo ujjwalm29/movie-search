@@ -11,6 +11,4 @@ Google has done a great job regarding this. If you search for an airport, it sho
  
 All of these advancements in the field of IR has been a result of almost half a century of academia + corporate research and 10s of billions of dollars spent on R&D.
 
-In this small tutorial, I will attempt to show you 
-
-By going through the various levels in the tutorial, you can get a basic understanding of how search works and has progressed over the years.  
+By going through the various levels in the tutorial, you can get a basic understanding of how search works and has progressed over the years.
