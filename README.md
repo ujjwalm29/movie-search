@@ -22,6 +22,6 @@ I am not an expert in this field so this means that your feedback is EXTREMELY v
 Is there something that wasn't explained well? Feel free to open a discussion or a pull request to suggest changes!
 
 With that, let's begin(follow the link, or click on the folder in the repo) : 
-- Level 1 : Basic string matching
-- Level 2 : Preprocessing, TF-IDF and ranking
-- Level 3 : Semantic search and embeddings
+- Level 1 : [Basic string matching](https://github.com/ujjwalm29/movie-search/tree/master/level_1_basic_string_matching)
+- Level 2 : [Preprocessing, TF-IDF and ranking](https://github.com/ujjwalm29/movie-search/tree/master/level_2_preprocessing_tfidf_ranked)
+- Level 3 : [Semantic search and embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_3_embeddings_and_semantic_search)
