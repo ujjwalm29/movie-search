@@ -1,6 +1,6 @@
 # Search and Information retrieval crash course
 
-Hello and welcome to this crash course on search and information retrieval.
+Hello and welcome to this crash course on search and information retrieval!
 
 Search is everywhere. It's an essential part of our lives. Imagine life without Google!
 
@@ -11,4 +11,17 @@ Google has done a great job regarding this. If you search for an airport, it sho
  
 All of these advancements in the field of IR has been a result of almost half a century of academia + corporate research and 10s of billions of dollars spent on R&D.
 
-By going through the various levels in the tutorial, you can get a basic understanding of how search works and has progressed over the years.
+More recently, machine learning and artificial intelligence is changing how we think about search.
+
+Search is quite a complex topic which requires general IR knowledge, domain understanding and data for personalization.
+ For this tutorial, I am going to be focussing on just the IR concepts. 
+
+By going through the various levels, you can get a basic understanding of how search works and has progressed over the years. We will be using a movie dataset to go through this tutorial. 
+This tutorial is still under progress so don't forget to star the repo to check back later! \
+I am not an expert in this field so this means that your feedback is EXTREMELY valuable to me. Is something in the content wrong? 
+Is there something that wasn't explained well? Feel free to open a discussion or a pull request to suggest changes!
+
+With that, let's begin(follow the link, or click on the folder in the repo) : 
+- Level 1 : Basic string matching
+- Level 2 : Preprocessing, TF-IDF and ranking
+- Level 3 : Semantic search and embeddings

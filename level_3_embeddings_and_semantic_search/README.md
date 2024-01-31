@@ -1,4 +1,4 @@
-# Level 3 : Embeddings and semantic search
+# Level 3 : Semantic search and embeddings
 
 Welcome to Level 3! In this level, we are going to be talking about how the field of IR and search has completely been transformed using Artificial Intelligence(AI).
 
