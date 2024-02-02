@@ -4,6 +4,12 @@ In this level, we will use basic string matching to search for the query term in
 
 To use string matching, we convert all titles, overviews and the search query to lower case and do a simple "contains" comparison.
 
+Here is the code snippet for the comparison : 
+```
+if (isinstance(row['title'], str) and search_query.lower() in row['title'].lower()) or (isinstance(row['overview'], str) and search_query.lower() in row['overview'].lower()):
+    movies.add(row['title'])
+```
+
 ## Execution
 
 I have used a few different search queries. Here are the results : 
@@ -29,19 +35,20 @@ The operation took 0.8357608318328857 seconds.
 Result : {'Superman Returns', 'Superman/Batman: Public Enemies', 'Batman: The Dark Knight Returns, Part 2', 'Superman vs. The Elite', 'Man of Steel', 'LEGO DC Comics Super Heroes: Justice League vs. Bizarro League', 'The Mad Scientist', 'Superman: Brainiac Attacks', 'All Star Superman', 'Superman III', 'Superman II', "It's A Bird, It's A Plane, It's Superman!", 'Confessions of a Superhero', 'The Death of "Superman Lives": What Happened?', 'Superman IV: The Quest for Peace'}
 ```
 
-The result seem decent! Let's analyse them
+The result seem decent! Let's analyse them.
 
 ## Analysis
 
 - The first thing to notice is that there is no "ordering". When you perform a google search, the results always seem sorted with respect to how relevant they might be to your query. But in our case we don't really have any sorting.
 - Although the results contain the movies we are looking for, it also contains a lot of junk. Ex: Why is the movie "Ed Hardy: Tattoo the World" the second result in the search for "The Godfather". Combined with the fact that there is no relevance sorting, the results are okayish.
+- For the query "god father", there are no results. That seems a little odd.
 
-My conclusion is, it works but ehhhh. It's kinda basic and not super helpful. If a search engine did this to you, you would stop using it.
+My conclusion is, it works but ehhhh. This is kinda basic and not super helpful. If a search engine did this to you, you would stop using it.
 
 ## Advanced
 
 There are a few things you could do here to get better results.
 
-- Compare each word instead of comparing full strings. Keep a count of how many words match. A higher count could mean a better match and it would allow you to rank the results.
+- Compare each word instead of comparing full strings. Keep a count of how many words match. A higher count could mean a better match and it would allow you to rank the results. Is there a way to do this efficiently? Check out Level 2 :)
 
 

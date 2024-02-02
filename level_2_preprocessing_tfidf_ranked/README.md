@@ -14,7 +14,17 @@ Below are some concepts and terms which have been used in this level. The defini
 
 ### Lemmatization
 
-As a preprocessing step, all the titles and overviews are lemmatized. For example, "running", "ran", and "runs" are all lemmatized to the base form "run". If a user searches for "runs", they are probably ok with results related "running" and "ran".
+As a preprocessing step, all the titles and overviews are lemmatized. For example, "running", "ran", and "runs" are all lemmatized to the base form "run". If a user searches for "runs", they are probably ok with results related to "running" and "ran".
+
+```
+def lemmatize(text):
+    # Check if the text is a string
+    if not isinstance(text, str):
+        return ""
+    lemmatizer = WordNetLemmatizer()
+    tokens = word_tokenize(text)
+    return ' '.join([lemmatizer.lemmatize(token) for token in tokens])
+```
 
 ### Removal of stop words
 
@@ -26,17 +36,62 @@ Aha! If you think about it, stop words in titles are relevant pieces of informat
 
 **This is an example of how Information Retrieval is an intricate play between the kind of data you have and the searches you expect. There are no fixed rules and everything is subjective.**
 
+
+```
+def lemmatize_and_remove_stop_words(text):
+    # Check if the text is a string
+    if not isinstance(text, str):
+        return ""
+
+    lemmatizer = WordNetLemmatizer()
+    stop_words = set(stopwords.words('english'))
+    tokens = word_tokenize(text)
+
+    # Lemmatize and remove stop words
+    lemmatized_tokens = [lemmatizer.lemmatize(token) for token in tokens if token.lower() not in stop_words]
+
+    return ' '.join(lemmatized_tokens)
+```
+
 ### TF-IDF : Term Frequency-Inverse Document Frequency
 
-First, sentences are split into pairs of words, also called bigrams (`TfidfVectorizer(ngram_range=(2, 2))` in the code).
+First, sentences are split into pairs of words, also called bigrams. (`TfidfVectorizer(ngram_range=(2, 2))` in the code).
+
+This is achieved by using the scikit-learn library as follows
+```
+vectorizer_title = TfidfVectorizer(ngram_range=(2, 2))
+vectorizer_overview = TfidfVectorizer(ngram_range=(2, 2))
+```
+
+What are bigrams?
+
+Example by ChatGPT - _Think of the phrase 'New York'. A bigram keeps 'New York' together, ensuring search results are about the city, not just any occurrence of 'new' or 'york'._
 
 But, why bigrams?
 
-It's all a matter of relevance. If you think about it, when we search for "The godfather", we are interested in titles which have _BOTH_ the words "the" and "godfather". If we don't use bigrams, our search results will have single keyword matching, which might not work in this case. PS : Check out the experiments section below where I search using single words instead of bigrams  
+It's all a matter of relevance. If you think about it, when we search for "The godfather", we are interested in titles which have _BOTH_ the words "the" and "godfather". If we don't use bigrams, our search results will have single keyword matching, which might not work in this case. PS : I may have spoken too soon(as i usually do in life). We need unigrams. Check out the advanced section below.
 
 Using the bigrams, the term frequency(TF) and inverse document frequency(IDF) is calculated. The TF-IDF representation is helpful in giving "weights" to words. Words which appear across a lot of documents get less weight, words which are rare get more weight. I am not going to go into the details of TF-IDF, but I would encourage you to read about it.
 
 The TF-IDF representations of titles and overview are stored in separate matrices. These are called __indexes__. An index is a general data structure which is used to improve performance of data retrieval at the cost of higher storage space. In our case, the indexes are TF-IDF matrices.
+
+```
+def create_tfidf_embeddings_title(df):
+    # Preprocess titles
+    df['processed_title'] = df['title'].apply(lambda x: lemmatize(x.lower() if isinstance(x, str) else x))
+
+    tfidf_matrix = vectorizer_title.fit_transform(df['processed_title'])
+
+    return tfidf_matrix
+    
+def create_tfidf_embeddings_overview(df):
+    # Preprocess titles
+    df['processed_overview'] = df['overview'].apply(lambda x: lemmatize_and_remove_stop_words(x.lower() if isinstance(x, str) else x))
+
+    tfidf_matrix = vectorizer_overview.fit_transform(df['processed_overview'])
+
+    return tfidf_matrix
+```
 
 ## Search
 
@@ -47,6 +102,27 @@ How is the search carried out?
 3. The respective search_query vectors are compared with their tfidf matrix. The scores for title and overview are obtained separately.
 4. The individual scores are added to get combined score.
 5. The top 10 corresponding indices are obtained from the original dataframe.
+
+Here is the code for search and rank
+
+```
+    # Convert the query to a TF-IDF vector for title and overview
+    query_vector_title = vectorizer_title.transform([lemmatize(query)])
+    query_vector_overview = vectorizer_overview.transform([lemmatize_and_remove_stop_words(query)])
+
+    # Compute similarities for title and overview
+    similarities_title = np.dot(tfidf_matrix_title, query_vector_title.T).toarray().ravel()
+    similarities_overview = np.dot(tfidf_matrix_overview, query_vector_overview.T).toarray().ravel()
+    
+    # Combine the similarities
+    combined_similarities = similarities_title + similarities_overview
+
+    # Get top 10 indices
+    top_indices = np.argsort(combined_similarities)[::-1][:10]
+
+    # Retrieve the original titles
+    top_titles = df.iloc[top_indices]['title'].tolist()
+```
 
 ## Execution
 
@@ -76,7 +152,7 @@ For me, the results are a mixed bag. Let's discuss the pros and cons.
 
 ### Pros :
 
-1. All queries have _some_ results. When using TF-IDF for search, a score is generated for each entry in the index. In the worst case, a search query matches with nothing. Still, 10 random(need to check if it's random, could depend on sequence of indexing) entries will be shown to the user.
+1. All queries have _some_ results. When using TF-IDF for search, a score is generated for each entry in the index. In the worst case, a search query finds no matches. Still, 10 random(need to check if it's random, could depend on sequence of indexing) entries will be shown to the user.
 2. Results are ranked. When searching for "the godfather", the relevant movies bubbled to the top due to high scores.
 3. Search is significantly faster. If you look in level 1, all searches took around 0.83 seconds. Initially, that doesn't seem so bad.
 But think about 2 factors. Firstly, we have very limited data. We have around 40k movie titles and overviews. Overviews are generally 2-3 sentences.
@@ -87,7 +163,7 @@ Considering these 2 factors, the TF-IDF search is much faster(0.013 seconds, alm
 1. The results for our searches aren't _great_. Searches for "the godfather" and "god father" seem ok. Search for "godfather" returns none of the godfather movies(sad). 
 Search for "Man of steel" returns only the "Man of steel" movie but none of the synonymous superman movies(like it did in level 1).
 
-Problems like these come under a field called **relevance** engineering. Relevance engineering is challenging since you need to decide what is relevant and then figure out some way of engineer that into your code.
+These issues fall into the field of **relevance engineering**. Relevance engineering is challenging since you need to decide what is relevant and then figure out some way to engineer that into your code.
 Book recommendation : [Relevant Search](https://www.manning.com/books/relevant-search). The technical aspects of Elasticsearch discussed might have become outdated now, but it helped me get an "essence" of
 what relevant search means, including non-code related activities.
 
@@ -208,10 +284,19 @@ MUCH BETTER!
 - For "Man of Steel", results have changed but the rest of the superman movies didn't show up.
 
 
-For "Man of Steel", there seems to be a lot of matches for "Man of" or "Steel". Due to titles being short and how TF-IDF calculates scores, the titles are given a lot more importance than a small match in overview.
+For "Man of Steel", there seems to be a lot of matches for "Man of" or "Steel". My suspicion : Due to titles being short and how TF-IDF calculates scores, the titles are given a lot more importance than a small match in overview.
 
-I could try and fix it but trying out a few things and giving "weights" to the title score and overview score, but I think I'll stop for now. You win some, you lose some. Let's move onto the next level!
+## Advanced :
 
+To recap, we did preprocessed the text, split it into unigrams and bigrams, created TF-IDF representations of the data and compared it with a similar representation of our query.
 
+In reality, keyword search is WAYYY more complex. Here are some pointers that will help you explore further : 
+- Nobody creates TF-IDF matrices like we did. It's better to use a feature rich search engine like [Elasticsearch](https://www.elastic.co/elasticsearch) or [Solr](https://solr.apache.org/) which gives a lot of functionality out of the box.
+- To score results, we used `np.dot` and sorted the results. In reality, most search engines use an algorithm called BM25 to rank documents for keyword search. [Here](https://medium.com/@evertongomede/understanding-the-bm25-ranking-algorithm-19f6d45c6ce) is a short article explaining BM25.
+- To improve search accuracy, we can use "signals". Signals can be anything and are usually domain dependent. In our case, one could say that if a movie is more popular or has a high rating, then it should be ranked higher. Or, if a movie was released recently, it should be ranked higher. According to a search expert I talked to, Google uses more than 100 signals per query.
+
+These are all good ways to improve our implementation. 
+
+As a starting point, let's do a small exercise. Do you think, for a movie, the title is more important than the overview? If yes, how would you model/integrate this thought into our code? Think about it! 
 
 

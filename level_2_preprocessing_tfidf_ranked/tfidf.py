@@ -15,8 +15,8 @@ file_path_vectorizer = 'tfidf_vectorizer.pkl'
 file_path_vectorizer_overview = 'tfidf_vectorizer_overview.pkl'
 
 # Initialize TF-IDF Vectorizer for bigrams
-vectorizer_title = TfidfVectorizer(ngram_range=(1, 2))
-vectorizer_overview = TfidfVectorizer(ngram_range=(1, 3))
+vectorizer_title = TfidfVectorizer(ngram_range=(2, 2))
+vectorizer_overview = TfidfVectorizer(ngram_range=(2, 2))
 
 
 def lemmatize(text):
