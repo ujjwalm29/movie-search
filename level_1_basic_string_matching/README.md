@@ -1,16 +1,21 @@
-# Level 1 : Basic string matching
+# Level 1: Basic String Matching 🔍
 
-In this level, we will use basic string matching to search for the query term in the title and overview of the movie.
+Welcome to Level 1 of our search and information retrieval crash course! In this level, we'll explore the fundamentals of search using basic string matching. Our goal is to search for a query term within the title and overview of movies in our dataset.
 
-To use string matching, we convert all titles, overviews and the search query to lower case and do a simple "contains" comparison.
+## 📘 Overview
 
-Here is the code snippet for the comparison : 
+To perform string matching, we convert all titles, overviews, and the search query to lower case and conduct a simple "contains" comparison. This approach, while straightforward, introduces us to the core concept of how search engines start understanding content matching.
+
+## 🖋️ Implementation
+
+Here's the code snippet for performing the comparison:
+
 ```
 if (isinstance(row['title'], str) and search_query.lower() in row['title'].lower()) or (isinstance(row['overview'], str) and search_query.lower() in row['overview'].lower()):
     movies.add(row['title'])
 ```
 
-## Execution
+## 🚀 Execution
 
 I have used a few different search queries. Here are the results : 
 
@@ -37,15 +42,17 @@ Result : {'Superman Returns', 'Superman/Batman: Public Enemies', 'Batman: The Da
 
 The result seem decent! Let's analyse them.
 
-## Analysis
+## 📊 Analysis
 
 - The first thing to notice is that there is no "ordering". When you perform a google search, the results always seem sorted with respect to how relevant they might be to your query. But in our case we don't really have any sorting.
 - Although the results contain the movies we are looking for, it also contains a lot of junk. Ex: Why is the movie "Ed Hardy: Tattoo the World" the second result in the search for "The Godfather". Combined with the fact that there is no relevance sorting, the results are okayish.
 - For the query "god father", there are no results. That seems a little odd.
 
+## Conclusion
+
 My conclusion is, it works but ehhhh. This is kinda basic and not super helpful. If a search engine did this to you, you would stop using it.
 
-## Advanced
+## 🔝 Advanced
 
 There are a few things you could do here to get better results.
 

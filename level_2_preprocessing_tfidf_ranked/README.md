@@ -1,16 +1,20 @@
-# Level 2 : Preprocessing, TF-IDF and ranking
+# Level 2 : Preprocessing, TF-IDF and ranking 🚀
 
-In this level, we are going to change the way we do things. We are going to use some new IR concepts and take advantage of preprocessing to 
+Welcome to Level 2 of this tutorial, where we enhance our search capabilities using some key Information Retrieval (IR) concepts and preprocessing techniques.
 
-## Terminology
+## 📘 Overview
 
-Below are some concepts and terms which have been used in this level. The definitions are obtained from ChatGPT and slightly modified. 
+This level introduces advanced concepts to refine our search approach, making it more efficient and relevant. 
+
+## 📚 Terminology
+
+Here's a brief overview of the terms and concepts utilized in this level:
 
 - Lemmatization : Lemmatization is a natural language processing technique that involves reducing words to their base or root form, known as the lemma. It considers the context and the morphological analysis of words, aiming to remove inflectional endings and return the dictionary form of a word. For example, "running", "ran", and "runs" are all lemmatized to the base form "run", taking into account their part of speech and tense.
 - Stop words removal : The removal of stop words in natural language processing involves discarding common words that carry minimal meaningful information for the intended analysis or processing task. Stop words typically include articles, prepositions, conjunctions, and sometimes common nouns or verbs, like "the", "is", "at", or "which".
 - TF-IDF : TF-IDF, short for Term Frequency-Inverse Document Frequency, is a statistical measure used in information retrieval to evaluate the importance of a word to a document in a collection or corpus. It balances two concepts: term frequency (TF), which counts how often a word appears in a document, and inverse document frequency (IDF), which diminishes the weight of words that appear frequently across multiple documents. This combination helps in identifying words that are unique and significant to a specific document. TF-IDF is super interesting and I would recommend reading more about it.
 
-## Preprocessing
+## 🛠 Preprocessing
 
 ### Lemmatization
 
@@ -53,7 +57,7 @@ def lemmatize_and_remove_stop_words(text):
     return ' '.join(lemmatized_tokens)
 ```
 
-### TF-IDF : Term Frequency-Inverse Document Frequency
+## 🗂 TF-IDF : Term Frequency-Inverse Document Frequency
 
 First, sentences are split into pairs of words, also called bigrams. (`TfidfVectorizer(ngram_range=(2, 2))` in the code).
 
@@ -93,7 +97,7 @@ def create_tfidf_embeddings_overview(df):
     return tfidf_matrix
 ```
 
-## Search
+## 🔍 Search Mechanism
 
 How is the search carried out?
 
@@ -124,7 +128,7 @@ Here is the code for search and rank
     top_titles = df.iloc[top_indices]['title'].tolist()
 ```
 
-## Execution
+## 📈 Execution
 
 Let's see how it works!
 
@@ -169,7 +173,7 @@ what relevant search means, including non-code related activities.
 
 I will be debugging this problem in the advanced section. Feel free to take a look or move on to the next level, where we integrate ML and AI into search. See you!
 
-## Advanced
+## 🚀 Advanced Section
 
 Let's debug our search problems.
 
