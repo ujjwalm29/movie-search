@@ -1,8 +1,8 @@
-# Level 3 : Semantic search and embeddings
+# Level 3 : Semantic search and embeddings 🧠
 
 Welcome to Level 3! In this level, we are going to be talking about how the field of IR and search has completely been transformed using Artificial Intelligence(AI).
 
-## Semantic search
+## 🤖 Semantic search
 
 Let's first try to answer _what_ is the problem with TF-IDF and _why_ do we need semantic search?
 
@@ -20,7 +20,7 @@ For our example, the "Relevant Document" would be "apple"(in our index) and the 
 
 So how does semantic search work?
 
-### Indexing
+### 📁 Indexing
 
 Each model takes text as input. First step is to decide what will be our input. For our case, I have taken the concatenation of title and overview as the input.
 
@@ -32,7 +32,7 @@ The embeddings model converts this string into a vector of many dimensions. **Us
 
 An advantage of using embedding models is that you do not necessarily need to preprocess your text(it is still recommended). This is due to the fact that words like "run", "running" and "ran" would usually be semantically similar.
 
-### Search
+### 🔍 Search
 
 While searching, take the search query and use it as input into the model. The model will give you a vector of the same dimension as the indexed data
 (Important : the same model needs to be used while indexing and searching data).
@@ -41,7 +41,7 @@ Once the vector is obtained, calculate the [cosine similarity](https://www.scien
 
 Now that you have a basic understanding of how semantic search works, let's give it a spin!
 
-## Execution
+## 🚀 Execution
 
 For this demonstration, I have added a new search query : "flying super hero" to see how search behaves
 
@@ -101,7 +101,7 @@ The results look _much_ better!
 - "Man of Steel" has many more mentions of superman(almost all, infact).
 - "flying super hero" has mentions of a lot of flying super hero movies including superman!(Although I have to warn you the second search result 'A Flying Jatt' is a shitty movie and my search application should be burnt down for pulling that up)
 
-Semantic search is relatively straightforward to implement for small projects and applications. Unfortunately, it doesn't _solve_ search relevance issues and relevance engineering is very much required.
+❗Semantic search is relatively straightforward to implement for small projects and applications. Unfortunately, it doesn't _solve_ search relevance issues and relevance engineering is very much required.
 One might say relevance engineering is even more important since the embeddings models essentially behave like black boxes(we don't know _why_ they do what they do).
 
 
