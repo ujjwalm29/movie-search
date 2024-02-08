@@ -14,14 +14,34 @@ password = os.getenv("PASSWORD")
 
 index_name = "movies"
 index_body = {
+    "settings": {
+        "analysis": {
+          "analyzer": {
+            "my_shingle_analyzer": {
+              "tokenizer": "standard",
+              "filter": [
+                "lowercase",
+                "my_shingles_filter"
+              ]
+            }
+          },
+          "filter": {
+            "my_shingles_filter": {
+              "type": "shingle",
+            }
+          }
+        }
+      },
     "mappings": {
         "dynamic": "strict",
         "properties": {
               "title": {
-                "type": "keyword"
+                "type": "text",
+                "analyzer": "my_shingle_analyzer",
+                "norms": "false"
               },
               "overview": {
-                "type": "text"
+                "type": "text",
               }
         }
     }
@@ -84,16 +104,18 @@ def index_documents(df):
 
 
 def search_title_and_overview(search_query):
+    print(f"Search query : {search_query}")
     start_time = time.time()
     search_query = {
         "query": {
             "multi_match": {
                 "query": search_query,  # The text you're searching for
-                "fields": ["title^100", "overview"],  # List of fields to search across
-
+                "fields": ["title^0.8", "overview"],  # List of fields to search across
+                "type": "most_fields"
             }
         },
-        "size": 5  # Control the number of results
+        "size": 10,  # Control the number of results
+        # "explain": "true"
     }
 
     # Execute the search query against the specified index.
@@ -105,7 +127,7 @@ def search_title_and_overview(search_query):
     # To access just the hits part which contains the search results:
     hits = response['hits']['hits']
     for hit in hits:
-        print(hit["_source"])  # This prints out the source document of each hit.
+        print(str(hit["_source"])[:200], end="...\n")  # This prints out the source document of each hit.
 
     # End time
     end_time = time.time()
@@ -122,4 +144,7 @@ df = parser.read_df_from_csv()
 
 create_index()
 index_documents(df)
-search_title_and_overview("the godfather")
+search_title_and_overview('The godfather')
+search_title_and_overview('godfather')
+search_title_and_overview('God father')
+search_title_and_overview('Man of Steel')
