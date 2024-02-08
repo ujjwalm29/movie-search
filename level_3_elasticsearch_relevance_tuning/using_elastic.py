@@ -110,8 +110,8 @@ def search_title_and_overview(search_query):
         "query": {
             "multi_match": {
                 "query": search_query,  # The text you're searching for
-                "fields": ["title^0.8", "overview"],  # List of fields to search across
-                "type": "most_fields"
+                "fields": ["title", "overview"],  # List of fields to search across
+                "type": "best_fields"
             }
         },
         "size": 10,  # Control the number of results

@@ -42,7 +42,8 @@ Let's dive into the levels:
 
 - **Level 1:** [Basic String Matching](https://github.com/ujjwalm29/movie-search/tree/master/level_1_basic_string_matching) 📝
 - **Level 2:** [Preprocessing, TF-IDF, and Ranking](https://github.com/ujjwalm29/movie-search/tree/master/level_2_preprocessing_tfidf_ranked) 🔍
-- **Level 3:** [Semantic Search and Embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_3_embeddings_and_semantic_search) 🧠
+- **Level 3:** [Elasticsearch and relevance tuning](https://github.com/ujjwalm29/movie-search/tree/master/level_3_elasticsearch_relevance_tuning) ⚙️
+- **Level 4:** [Semantic Search and Embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_4_embeddings_and_semantic_search) 🧠
 
 ## Contributing and Feedback
 
