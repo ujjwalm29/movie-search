@@ -295,7 +295,7 @@ For "Man of Steel", there seems to be a lot of matches for "Man of" or "Steel". 
 To recap, we did preprocessed the text, split it into unigrams and bigrams, created TF-IDF representations of the data and compared it with a similar representation of our query.
 
 In reality, keyword search is WAYYY more complex. Here are some pointers that will help you explore further : 
-- Nobody creates TF-IDF matrices like we did. It's better to use a feature rich search engine like [Elasticsearch](https://www.elastic.co/elasticsearch) or [Solr](https://solr.apache.org/) which gives a lot of functionality out of the box.
+- Nobody creates TF-IDF matrices like we did. It's better to use a feature rich search engine like [Elasticsearch](https://www.elastic.co/elasticsearch) or [Solr](https://solr.apache.org/) which gives a lot of functionality out of the box. (Update : Level 3 introduces Elasticsearch!)
 - To score results, we used `np.dot` and sorted the results. In reality, most search engines use an algorithm called BM25 to rank documents for keyword search. [Here](https://medium.com/@evertongomede/understanding-the-bm25-ranking-algorithm-19f6d45c6ce) is a short article explaining BM25.
 - To improve search accuracy, we can use "signals". Signals can be anything and are usually domain dependent. In our case, one could say that if a movie is more popular or has a high rating, then it should be ranked higher. Or, if a movie was released recently, it should be ranked higher. According to a search expert I talked to, Google uses more than 100 signals per query.
 

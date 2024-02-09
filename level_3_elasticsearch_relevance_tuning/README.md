@@ -1,11 +1,47 @@
- # Elasticsearch and relevance tuning (Under construction)⚙️
+ # Elasticsearch and relevance tuning⚙️
+ 
+Welcome to level 3 of the Search and Information Retrieval Crash Course! I am so happy to see you here!
+ 
+## Introduction
 
+In this level, we will be taking one step further with TF-IDF and keyword matching. Originally, the plan was to jump directly to semantic search, but I think it's important to know about tools like Elasticsearch and Solr. 
+They are very powerful and have support for semantic search as well. For the purpose of this demo, we will be using Elasticsearch.
 
-blah blah blah
+Elasticsearch is a distributed search and analytics engine built on Apache Lucene. Since its release in 2010, Elasticsearch has quickly become the most popular search engine and is commonly used for log analytics, full-text search, security intelligence, business analytics, and operational intelligence use cases - AWS
 
-Took 2.5 minutes to index
+The official docs of Elasticsearch have been super helpful to me and I encourage everyone to read them.
 
-Index body : 
+## Setup
+
+Since we are using a tool, there is a little bit of setup involved.
+
+1. Install docker - Use the preferred link from [here](https://docs.docker.com/engine/install/) and install docker(installing docker desktop is preferred).
+2. Install Elasticsearch using their docker image. Use the official elastic docs [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) or execute the commands below : 
+
+- `docker pull docker.elastic.co/elasticsearch/elasticsearch:8.12.1`
+- `docker run --name es01 -p 9200:9200 docker.elastic.co/elasticsearch/elasticsearch:8.12.1`
+
+Congrats! You now have Elasticsearch running! Couple of things left to do.
+
+You need to generate a password. Execute the following command
+```
+docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+```
+
+Take the password generated and paste it in the .env file in your code.
+
+❗❗❗**IMPORTANT SECURITY NOTE : Do not ever commit your .env file to your repository. I initially committed it mistakenly, but didn't remove it so that it's easier for people to use this repo.**
+
+You will also need a certificate. From whichever folder you plan to execute your python code, execute the following command :
+```
+docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
+```
+
+Cool, now we're all setup!
+
+## Indexing
+
+Here is the initial structure of our Elasticsearch(ES) index
 ```
 index_body = {
     "mappings": {
@@ -21,6 +57,22 @@ index_body = {
     }
 }
 ```
+
+Super simple, 2 fields, using the text type.
+
+Using python and some of our existing code, I indexed all of our movie data into this index. It took around 150 seconds or so.
+
+## Search
+
+We are going to start of with a simple query and modify the index and query as required. Note that if you modify the index, you will need to delete your index first.
+
+You can use the following cURL request to delete your index.
+
+```
+curl -k -u "elastic:<password>" --request DELETE "https://localhost:9200/movies"
+```
+
+Let's get on with our query!
 
 Query : 
 ```
@@ -129,7 +181,7 @@ index_body = {
 
 I used the [standard analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html) and added an additional filter `my_shingles_filter` on top of it. The my_shingles_filter is defined just below that.
 
-Let's reindex the data and see the results : 
+Delete the index, reindex the data and execute the search. Here are the results : 
 
 ```
 {'title': 'The Godfather', 'overview': 'Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barel...
