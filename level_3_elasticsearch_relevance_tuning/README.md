@@ -449,6 +449,75 @@ The operation took 0.011137962341308594 seconds.
 Yessssss!! We finally have some superman movies show up in the search results for "Man of steel". Additionally, the godfather movies also seem to be scored higher and are the top results in their searches.
 
 
+## More Elasticsearch
+
+### Fuzzy matching
+
+Our search works well! But we all know users can be unpredictable. They all want to type fast on their noisy mechanical keyboards.
+
+So when they want to search for "godfather", they might end up typing "godafther". Let's give it a try and see what happens to our search setup :
+
+```
+Search query : godafther
+{'took': 6, 'timed_out': False, '_shards': {'total': 1, 'successful': 1, 'skipped': 0, 'failed': 0}, 'hits': {'total': {'value': 0, 'relation': 'eq'}, 'max_score': None, 'hits': []}}
+The operation took 0.01894688606262207 seconds.
+```
+
+Oooh that's not very good. No results! Wouldn't it be cool if Elasticsearch could magically take care of users' minor input errors?
+
+Fret not! Elasticsearch has this feature called [fuzzy query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html). It has the ability to handle minor errors in input and generate various possibilities of what the user might be trying to search.
+As always, you are encouraged to read the docs to find the different parameters that fuzzy query takes.
+
+For the our example, I will implement fuzzy query only on the title field. Here is the query : 
+
+```
+    search_query = {
+      "query": {
+        "fuzzy": {
+          "title": {
+            "value": search_query,
+            "fuzziness": "AUTO",
+            "max_expansions": 20,
+            "prefix_length": 1,     # trust the user to at least enter the first letter correctly
+          }
+        }
+      }
+    }
+```
+
+Let's execute our search now!
+
+```
+Search query : godafther
+{'title': 'The Godfather: Part III', 'overview': 'In the midst of trying to legitimize his business dealings in 1979 New York and Italy, aging mafia don, Michael Corleone seeks forgiveness for his sin...
+{'title': 'The Godfather: Part II', 'overview': 'In the continuing saga of the Corleone crime family, a young Vito Corleone grows up in Sicily and in 1910s New York. In the 1950s, Michael Corleone att...
+{'title': 'The Godfather', 'overview': 'Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barel...
+{'title': 'The Last Godfather', 'overview': "Young-goo the son of mafia boss Don Carini, is too foolish to be part of the mafia elite. One day, Young-goo comes to his father and is trained by Tony V t...
+{'title': 'Disco Godfather', 'overview': 'A retired cop becomes a DJ/celebrity at the Blueberry Hill disco-- he\'s the "Disco Godfather!" All is well until his nephew flips out on a strange new drug t...
+{'title': 'Godfather', 'overview': 'The story of Anjooran (N. N. Pillai), and his four sons Balaraman (Thilakan), Swaminathan (Innocent), Premachandran (Bheeman Raghu) and Ramabhadran (Mukesh) are in ...
+{'title': 'Onimasa: A Japanese Godfather', 'overview': 'Onimasa is the egocentric boss of a small yakuza clan on Shikoku Island, whose criminal duties conflict with his self-image as a chivalrous samu...
+{'title': 'The Godfather Trilogy: 1972-1990', 'overview': 'The multigenerational saga of the rise and fall of the Corleone crime family.'}...
+{'title': 'Tokyo Godfathers', 'overview': 'One Christmas Eve three people, a middle-aged alcoholic named Gin, a former drag queen Hana and a dependent runaway girl Miyuki, discover an abandoned newbor...
+{'title': '3 Godfathers', 'overview': 'Three outlaws on the run discover a dying woman and her baby. They swear to bring the infant to safety across the desert, even at the risk of their own lives.'}...
+The operation took 0.0175778865814209 seconds.
+```
+
+Woahh! This looks totally awesome! Elasticsearch was able to find the exact thing we were looking for! But beware : Using fuzzy queries will have an impact on the performance of your queries.
+As with all things Computer Science(and maybe life?), everything is a tradeoff. There are no silver bullets.
+
+BUT WAIT. I'm curious to see what happens with "Man of Steel" now. Let's see : 
+```
+Search query : Man of Steel
+{'took': 5, 'timed_out': False, '_shards': {'total': 1, 'successful': 1, 'skipped': 0, 'failed': 0}, 'hits': {'total': {'value': 0, 'relation': 'eq'}, 'max_score': None, 'hits': []}}
+The operation took 0.012096166610717773 seconds.
+```
+
+WHAT! 0 results? How is that possible?
+
+
+
+
+
 
 
 
