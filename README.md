@@ -41,9 +41,22 @@ For each of the levels go through the README files. In case you are interested i
 Let's dive into the levels:
 
 - **Level 1:** [Basic String Matching](https://github.com/ujjwalm29/movie-search/tree/master/level_1_basic_string_matching) 📝
+  - Basic python 'contains' string matching
 - **Level 2:** [Preprocessing, TF-IDF, and Ranking](https://github.com/ujjwalm29/movie-search/tree/master/level_2_preprocessing_tfidf_ranked) 🔍
+  - Preprocessing : Lemmatization, stop-words, Term Frequency-Inverse Document Frequency(TF-IDF), Bigrams, creating indexes
+  - Search : vectors, dot-product, scoring
+  - Advanced : Debugging relevance issues :- Unigrams + Bigrams
 - **Level 3:** [Elasticsearch and relevance tuning](https://github.com/ujjwalm29/movie-search/tree/master/level_3_elasticsearch_relevance_tuning) ⚙️
+  - Install docker, Elasticsearch, certificates
+  - Indexing : types, analyzers, filters, tokenizer, custom shingles filter.
+  - Search : match, boosting, multi_match, most_fields, best_fields, explain parameter, norms, fuzzy queries, function_score, dis_max, boolean queries.
+  - Search results regression : How to avoid them?
 - **Level 4:** [Semantic Search and Embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_4_embeddings_and_semantic_search) 🧠
+  - Semantic search
+  - cosine similarity
+  - embedding models, sentence-transformers, huggingface, MTEB
+- **Level 5:** Hybrid search and RRF using Elasticsearch(coming soon) 
+- **Level 6:** Knowledge Graphs(coming soon)
 
 ## Contributing and Feedback
 
