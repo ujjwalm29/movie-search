@@ -514,10 +514,187 @@ The operation took 0.012096166610717773 seconds.
 
 WHAT! 0 results? How is that possible?
 
+At this moment, I have 2 major concerns :
 
+1. What happened to the "Man of Steel" results? Yes, our query doesn't include Man of steel but still, we should get at least 1 match.
+2. The search results changed and I didn't get to know until I actually executed the search myself. This is not ideal and not a sustainable way of keeping track of search results.
 
+### Fixing "Man of Steel" query and including overview field
 
+I tried looking at the docs and at other places like ChatGPT, but couldn't really find an explanation for why the above query doesn't work.
 
+But then, ChatGPT suggested using a `match` query with fuzziness instead of using a `fuzzy` query. Modified query:
 
+```
+search_query_es = {
+  "query": {
+    "match": {
+      "title": {
+        "query": search_query,
+        "fuzziness": "AUTO",
+        "prefix_length": "1"
+      }
+    }
+  }
+}
+```
+
+This seems to do what I want it to do, so we'll go with this. I am still interested in finding out why `fuzzy` query didn't work, but maybe later.
+
+If you recall(hehe get it? nvm), we removed the overview field from our query to try out the fuzzy query. Let's try to put it back. BUT, there is a caveat.
+I want _ONLY_ the title field to have fuzzy matching and the overview field to have the regular matching.
+
+Apparently, there is no easy or seamless way to put this in a `best_fields` kind of parameter. We need to go into the trenches of Elasticsearch and Apache Lucene and create a [boolean query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html).
+
+After a bit of experimentation, I was able to come up with this boolean query :
+
+```
+search_query_es = {
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title": {
+              "query": search_query,
+              "fuzziness": "AUTO",
+              "prefix_length": "1"
+            }
+          }
+        },
+        {
+          "match": {
+            "overview": {
+              "query": search_query
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1  # At least one of the conditions should match
+    }
+  }
+}
+```
+
+Here are the results with this :
+```
+Search query : Man of Steel
+{'title': 'Man of Steel', 'overview': 'A young boy learns that he has extraordinary powers and is not of this earth. As a young man, he journeys to discover where he came from and what he was sent her...
+{'title': 'Max Steel', 'overview': 'The adventures of teenager Max McGrath and alien companion Steel, who must harness and combine their tremendous new powers to evolve into the turbo-charged superher...
+{'title': 'Steel Toes', 'overview': 'Steel Toes is a provocative exploration of the inescapable and insidious presence of racial and religious intolerance in our society.'}...
+{'title': 'The Flower with Petals of Steel', 'overview': "Wealthy surgeon Andreas Valenti accidentally kills one of his lovers, Daniella, with an unusual objet d'arte and covers it up by dismembering ...
+{'title': 'Steel', 'overview': 'Justice. Safe streets. Payback. Metallurgist John Henry Irons (O\'Neal) vows to claim them all when a renegade military reject (Judd Nelson) puts new superweapons in da...
+{'title': 'Slow Southern Steel', 'overview': 'Slow Southern Steel is a film about heavy music in the modern American\n South, as told by the very people who have created this music during\n the last t...
+{'title': 'Steel', 'overview': 'Here, the steel worker works on a continuous cycle, twenty-four hours a day and never stops. There, by the sea, on the island of Elba there is a paradise and the unreac...
+{'title': 'Steel Cold Winter', 'overview': 'A boy transfers to a school in the countryside, where he finds himself attracted to a mysterious girl. The girl lives alone with her mental patient father a...
+{'title': 'Hands of Steel', 'overview': 'A story about a cyborg who is programmed to kill a scientist who holds the fate of mankind in his hands.'}...
+{'title': 'Tears of Steel', 'overview': 'The film’s premise is about a group of warriors and scientists, who gathered at the “Oude Kerk” in Amsterdam to stage a crucial event from the past, in a despe...
+The operation took 0.018302202224731445 seconds.
+
+Search query : the godafther
+{'title': 'The Godfather Trilogy: 1972-1990', 'overview': 'The multigenerational saga of the rise and fall of the Corleone crime family.'}...
+{'title': 'The Godfather: Part II', 'overview': 'In the continuing saga of the Corleone crime family, a young Vito Corleone grows up in Sicily and in 1910s New York. In the 1950s, Michael Corleone att...
+{'title': 'The Last Godfather', 'overview': "Young-goo the son of mafia boss Don Carini, is too foolish to be part of the mafia elite. One day, Young-goo comes to his father and is trained by Tony V t...
+{'title': 'The Godfather', 'overview': 'Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barel...
+{'title': 'The Godfather: Part III', 'overview': 'In the midst of trying to legitimize his business dealings in 1979 New York and Italy, aging mafia don, Michael Corleone seeks forgiveness for his sin...
+{'title': "Cocaine Cowboys II: Hustlin' with the Godmother", 'overview': 'Set in 1991 on the inner-city streets of Oakland, California, cocaine dealer Charles Cosby has his life is changed forever whe...
+{'title': 'The New Godfathers', 'overview': 'A revolution in Iran halts a heroin shipment, but an alliance of crime families is set on getting it to the US.  They decide to run the drug through an uns...
+{'title': 'Disco Godfather', 'overview': 'A retired cop becomes a DJ/celebrity at the Blueberry Hill disco-- he\'s the "Disco Godfather!" All is well until his nephew flips out on a strange new drug t...
+{'title': 'Onimasa: A Japanese Godfather', 'overview': 'Onimasa is the egocentric boss of a small yakuza clan on Shikoku Island, whose criminal duties conflict with his self-image as a chivalrous samu...
+{'title': 'Godfather', 'overview': 'The story of Anjooran (N. N. Pillai), and his four sons Balaraman (Thilakan), Swaminathan (Innocent), Premachandran (Bheeman Raghu) and Ramabhadran (Mukesh) are in ...
+The operation took 0.010884761810302734 seconds.
+```
+
+Ok, this is _fine_. The 4 godfather entries are in the top 5. I am a little upset that they're not the top 4.
+For Man of Steel, it again seems like the title is weighing heavily on the scoring of the query. None of the other superman movies are showing up.
+
+Need to fix this.
+
+After researching for a bit, trying out a looooooot of things, I have finally found something which works: 
+```
+search_query_es = {
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "title": {
+              "query": search_query,
+              "fuzziness": "AUTO"
+            }
+          }
+        },
+        {
+          "match": {
+            "overview": {
+              "query": search_query,
+              "boost": 1.3
+            }
+          }
+        }
+      ],
+      "tie_breaker": 0.1
+    }
+  }
+}
+```
+
+This query uses the [dis_max](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-dis-max-query.html) query type. 
+I was looking for an alternate way to do `best_fields` while adding fuzzy matching to only 1 field.
+
+Results :
+```
+Search query : Man of Steel
+{'title': 'Man of Steel', 'overview': 'A young boy learns that he has extraordinary powers and is not of this earth. As a young man, he journeys to discover where he came from and what he was sent her...
+{'title': 'John Henry', 'overview': "Disney's retelling of the legend of John Henry, the steel-driving man."}...
+{'title': 'The Mad Scientist', 'overview': 'The Man of Steel fights a mad scientist who is destroying Metropolis with an energy cannon.'}...
+{'title': 'Superman vs. The Elite', 'overview': 'The Man of Steel finds himself outshone by a new team of ruthless superheroes who hold his idealism in contempt.'}...
+{'title': "It's A Bird, It's A Plane, It's Superman!", 'overview': 'TV adaptation of the campy 1960s Broadway musical about the Man of Steel, his friends, his enemies, and his self-image problems.'}...
+{'title': 'The Flower with Petals of Steel', 'overview': "Wealthy surgeon Andreas Valenti accidentally kills one of his lovers, Daniella, with an unusual objet d'arte and covers it up by dismembering ...
+{'title': 'Max Steel', 'overview': 'The adventures of teenager Max McGrath and alien companion Steel, who must harness and combine their tremendous new powers to evolve into the turbo-charged superher...
+{'title': 'Hands of Steel', 'overview': 'A story about a cyborg who is programmed to kill a scientist who holds the fate of mankind in his hands.'}...
+{'title': 'Tears of Steel', 'overview': 'The film’s premise is about a group of warriors and scientists, who gathered at the “Oude Kerk” in Amsterdam to stage a crucial event from the past, in a despe...
+{'title': 'Ring of Fire II: Blood and Steel', 'overview': 'Johnny Woo and Julie play an enduring couple who survive all sorts of interference from rival kick-box gangs in their effort to put a little ...
+The operation took 0.03205513954162598 seconds.
+
+Search query : the godafther
+{'title': 'The Godfather Trilogy: 1972-1990', 'overview': 'The multigenerational saga of the rise and fall of the Corleone crime family.'}...
+{'title': 'The Godfather: Part II', 'overview': 'In the continuing saga of the Corleone crime family, a young Vito Corleone grows up in Sicily and in 1910s New York. In the 1950s, Michael Corleone att...
+{'title': 'The Last Godfather', 'overview': "Young-goo the son of mafia boss Don Carini, is too foolish to be part of the mafia elite. One day, Young-goo comes to his father and is trained by Tony V t...
+{'title': 'The Godfather', 'overview': 'Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barel...
+{'title': 'The Godfather: Part III', 'overview': 'In the midst of trying to legitimize his business dealings in 1979 New York and Italy, aging mafia don, Michael Corleone seeks forgiveness for his sin...
+{'title': "Cocaine Cowboys II: Hustlin' with the Godmother", 'overview': 'Set in 1991 on the inner-city streets of Oakland, California, cocaine dealer Charles Cosby has his life is changed forever whe...
+{'title': 'The New Godfathers', 'overview': 'A revolution in Iran halts a heroin shipment, but an alliance of crime families is set on getting it to the US.  They decide to run the drug through an uns...
+{'title': 'Disco Godfather', 'overview': 'A retired cop becomes a DJ/celebrity at the Blueberry Hill disco-- he\'s the "Disco Godfather!" All is well until his nephew flips out on a strange new drug t...
+{'title': 'Onimasa: A Japanese Godfather', 'overview': 'Onimasa is the egocentric boss of a small yakuza clan on Shikoku Island, whose criminal duties conflict with his self-image as a chivalrous samu...
+{'title': 'Godfather', 'overview': 'The story of Anjooran (N. N. Pillai), and his four sons Balaraman (Thilakan), Swaminathan (Innocent), Premachandran (Bheeman Raghu) and Ramabhadran (Mukesh) are in ...
+The operation took 0.012058019638061523 seconds.
+
+Search query : the godfather
+{'title': 'The Godfather Trilogy: 1972-1990', 'overview': 'The multigenerational saga of the rise and fall of the Corleone crime family.'}...
+{'title': 'The Godfather: Part II', 'overview': 'In the continuing saga of the Corleone crime family, a young Vito Corleone grows up in Sicily and in 1910s New York. In the 1950s, Michael Corleone att...
+{'title': 'The Godfather', 'overview': 'Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barel...
+{'title': 'The Godfather: Part III', 'overview': 'In the midst of trying to legitimize his business dealings in 1979 New York and Italy, aging mafia don, Michael Corleone seeks forgiveness for his sin...
+{'title': 'The Last Godfather', 'overview': "Young-goo the son of mafia boss Don Carini, is too foolish to be part of the mafia elite. One day, Young-goo comes to his father and is trained by Tony V t...
+{'title': 'Disco Godfather', 'overview': 'A retired cop becomes a DJ/celebrity at the Blueberry Hill disco-- he\'s the "Disco Godfather!" All is well until his nephew flips out on a strange new drug t...
+{'title': 'I Knew It Was You: Rediscovering John Cazale', 'overview': "John Cazale was in only five films - The Godfather, The Conversation, The Godfather, Part Two, Dog Day Afternoon, and The Deer Hu...
+{'title': 'Onimasa: A Japanese Godfather', 'overview': 'Onimasa is the egocentric boss of a small yakuza clan on Shikoku Island, whose criminal duties conflict with his self-image as a chivalrous samu...
+{'title': "Jane Austen's Mafia!", 'overview': 'Takeoff on the Godfather with the son of a mafia king taking over for his dying father.'}...
+{'title': 'The New Godfathers', 'overview': 'A revolution in Iran halts a heroin shipment, but an alliance of crime families is set on getting it to the US.  They decide to run the drug through an uns...
+The operation took 0.011803150177001953 seconds.
+```
+
+Phew! That took a while! 
+
+### Search Results Regressions
+
+Let's move on to our other problem : Search regressions.
+
+Search regressions happen when someone tries to fix a problem in some aspect of search/search relevance but breaks some existing search setup.
+
+In Software development, we avoid such regressions by creating test suites. The software world has many frameworks to help us write all kinds of tests.
+Question is, does anything like this exist for search?
+
+Creating a test framework for search is a little tricky in comparison to software test frameworks. The main issue is that, in most cases, a computer cannot judge whether the search is good or not. We need human input at some stage.
 
 

@@ -104,7 +104,7 @@ def index_documents(df):
 
 
 def search_title_and_overview(search_query):
-    print(f"Search query : {search_query}")
+    print(f"Search query : {search_query}\n")
     start_time = time.time()
     # search_query_es = {
     #     "query": {
@@ -117,56 +117,44 @@ def search_title_and_overview(search_query):
     #     "size": 10,  # Control the number of results
     # }
 
-    search_query_es = {
-      "query": {
-        "fuzzy": {
-          "title": {
-            "value": search_query,
-            "fuzziness": "AUTO",
-            "max_expansions": 20,
-            "prefix_length": 1,     # trust the user to at least enter the first letter correctly
-          }
-        }
-      },
-      # "explain": "true"
-    }
-
     # search_query_es = {
-    #     "query": {
-    #         "bool": {
-    #             "should": [
-    #                 {
-    #                     "match": {
-    #                         "overview": search_query
-    #                     }
-    #                 },
-    #                 {
-    #                  "fuzzy": {
-    #                       "title": {
-    #                         "value": search_query,
-    #                         "fuzziness": "AUTO",
-    #                         "max_expansions": 20,
-    #                         "prefix_length": 1,     # trust the user to at least enter the first letter correctly
-    #                       }
-    #                     }
-    #                 }
-    #             ]
-    #         }
-    #     },
-    #     "size": 10
+    #   "query": {
+    #     "match": {
+    #       "title": {
+    #         "query": search_query,
+    #         "fuzziness": "AUTO",
+    #         "prefix_length": "1"
+    #       }
+    #     }
+    #   }
     # }
 
-    # search_query_es = {
-    #         "query": {
-    #             "bool": {
-    #                 "filter": {
-    #                     "term": {
-    #                         "title": "active"
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     }
+    search_query_es = {
+      "query": {
+        "dis_max": {
+          "queries": [
+            {
+              "match": {
+                "title": {
+                  "query": search_query,
+                  "fuzziness": "AUTO"
+                }
+              }
+            },
+            {
+              "match": {
+                "overview": {
+                  "query": search_query,
+                  "boost": 1.3
+                }
+              }
+            }
+          ],
+          "tie_breaker": 0.1
+        }
+      }
+    }
+
 
 
     # Execute the search query against the specified index.
@@ -202,4 +190,5 @@ index_documents(df)
 
 search_title_and_overview('Man of Steel')
 search_title_and_overview('the godafther')
+search_title_and_overview('the godfather')
 
