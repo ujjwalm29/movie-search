@@ -54,18 +54,23 @@ The first model being used is : [all-MiniLM-L6-v2](https://huggingface.co/senten
 Execution results : 
 ```
 Search query : the godfather
+The operation took 1.829395055770874 seconds.
 Results : ["Jane Austen's Mafia!", 'The Godfather Trilogy: 1972-1990', 'The Godfather: Part II', 'The Godfather: Part III', 'The Godfather', '3 Godfathers', 'The Mafia Kills Only in Summer', 'I Knew It Was You: Rediscovering John Cazale', 'The New Godfathers', 'Donnie Brasco']
 
 Search query : godfather
+The operation took 0.9319398403167725 seconds.
 Results : ["Jane Austen's Mafia!", 'The Godfather Trilogy: 1972-1990', 'The Godfather: Part III', 'The Godfather', 'The Godfather: Part II', '3 Godfathers', 'The Mafia Kills Only in Summer', "Assassin's Creed: Lineage", 'The New Godfathers', 'C(r)ook']
 
 Search query : God father
+The operation took 0.0729820728302002 seconds.
 Results : ['Father of Four: Never Gives Up!', 'Just a Father', 'Son of Sam', "Who's Your Daddy?", 'Oh My God', 'The Father and the Foreigner', 'For My Father', 'Most', 'Daddy', 'Romulus, My Father']
 
 Search query : Man of Steel
+The operation took 0.9092001914978027 seconds.
 Results : ['Man of Steel', 'Steel', 'Iron Man', 'Iron Man: Rise of Technovore', 'John Henry', 'Steel Frontier', 'Iron Man 3', 'The Invincible Iron Man', 'Strongman', 'The Mad Scientist']
 
 Search query : flying super hero
+The operation took 0.07603263854980469 seconds.
 Results : ['The Flying Man', 'Super Fly', 'Crumbs', 'Super Capers', 'A Flying Jatt', 'Super', 'Knight Rider', 'Sunshine Superman', 'God Is My Co-Pilot', 'Supersonic Man']
 ```
 
@@ -81,18 +86,23 @@ Since the vector is bigger, indexing took longer(30 minutes) but we should expec
 Execution results : 
 ```
 Search query : the godfather
+The operation took 1.280898094177246 seconds.
 Results : ['The Godfather Trilogy: 1972-1990', 'The Godfather', "Jane Austen's Mafia!", 'The Godfather: Part III', 'The Last Godfather', 'The Godfather: Part II', 'Godfather', 'Underworld', 'The New Godfathers', '3 Godfathers']
 
 Search query : godfather
+The operation took 0.9506678581237793 seconds.
 Results : ['The Godfather', "Jane Austen's Mafia!", 'The Godfather Trilogy: 1972-1990', 'The Godfather: Part III', 'The Last Godfather', 'Godfather', 'The Godfather: Part II', '3 Godfathers', 'The New Godfathers', 'Underworld']
 
 Search query : God father
+The operation took 0.2025141716003418 seconds.
 Results : ['God Willing', 'Oh, God!', 'Godheten', 'The Brand New Testament', 'Oh, God! Book II', 'Oh My God', 'Ordet', 'God Tussi Great Ho', 'Abraham', "God's Gun"]
 
 Search query : Man of Steel
+The operation took 0.9013500213623047 seconds.
 Results : ["It's A Bird, It's A Plane, It's Superman!", 'The Mad Scientist', 'Man of Steel', 'Superman vs. The Elite', 'All Star Superman', 'Superman III', 'Superman II', 'Superman IV: The Quest for Peace', 'A Man Who Was Superman', 'Superman/Batman: Public Enemies']
 
 Search query : flying super hero
+The operation took 0.20586085319519043 seconds.
 Results : ['The Flying Man', 'A Flying Jatt', 'Supersonic Man', 'Up, Up, and Away', 'Phantom Boy', 'Sunshine Superman', 'Crumbs', 'Look, Up in the Sky: The Amazing Story of Superman', 'Sky High', 'American Hero']
 ```
 
@@ -103,6 +113,8 @@ The results look _much_ better!
 
 ❗Semantic search is relatively straightforward to implement for small projects and applications. Unfortunately, it doesn't _solve_ search relevance issues and relevance engineering is very much required.
 One might say relevance engineering is even more important since the embeddings models essentially behave like black boxes(we don't know _why_ they do what they do).
+
+Check out the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard) on huggingface for the best embedding models.
 
 
 

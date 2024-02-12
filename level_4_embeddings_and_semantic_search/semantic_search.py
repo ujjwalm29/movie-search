@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import ast
+import time
 
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')  # 8 minutes
 model_2_large = SentenceTransformer('thenlper/gte-large')   # 30 minutes
@@ -35,6 +35,8 @@ def create_embeddings(df, model_to_use, file_name='df_with_embeddings.pkl', ):
 
 
 def search_and_rank(query, model_to_use, df):
+    start_time = time.time()
+
     print(f"Search query : {query}")
     # Generate the embedding for the query
     query_embedding = model_to_use.encode([query])
@@ -50,6 +52,14 @@ def search_and_rank(query, model_to_use, df):
 
     # Get the titles of the top 10 results
     top_titles = df.iloc[top_indices]['title']
+
+    # End time
+    end_time = time.time()
+
+    # Calculate duration
+    duration = end_time - start_time
+
+    print(f"The operation took {duration} seconds.")
 
     return top_titles.tolist()
 
