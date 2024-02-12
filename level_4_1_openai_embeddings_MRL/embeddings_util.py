@@ -1,4 +1,5 @@
 from openai import OpenAI
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 import os
 import tiktoken
@@ -54,73 +55,62 @@ def count_tokens(df):
     print(f"Total count : {combined_total_tokens}")
 
 
+def get_embedding_for_row(row):
+    """
+    Generate embedding for a single row.
+    """
+    categories = ""
+    if row['vote_average'] >= 6.5 and row['original_language'] == "en":
+        col_val = json.loads(row['genres'].replace("'", '"'))
+        for category in col_val:
+            categories += f" {category['name']}"
+        concatenated_text = str(row['title']) + " " + str(row['overview']) + " " + categories
+        return get_embedding(concatenated_text)
+    return None
+
+
 def create_embeddings(df, file_name='df_with_openai_embeddings.pkl'):
     start_time = time.time()
-
     total_title_tokens = 0
     total_overview_tokens = 0
-    # Check if the file exists
+
     if os.path.isfile(file_name):
-        # Load DataFrame from the file
         df_with_embeddings = pd.read_pickle(file_name)
     else:
-        # Initialize an empty list to store embeddings
-        embeddings = []
+        # Use ThreadPoolExecutor to parallelize embedding generation
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            # Submit all embedding generation tasks
+            future_to_row = {executor.submit(get_embedding_for_row, row): index for index, row in df.iterrows()}
 
-        # Iterate over each row in the DataFrame
-        for index, row in df.iterrows():
-            print(index)
-            if row['vote_average'] < 6.5 or row['original_language'] != "en":
-                continue
+            embeddings = [None] * len(df)  # Initialize a list to hold embeddings
+            for future in as_completed(future_to_row):
+                index = future_to_row[future]
+                print(index)
+                try:
+                    embedding = future.result()  # Obtain result
+                    if embedding is not None:
+                        embeddings[index] = embedding
+                        # Update token counts here if needed
+                except Exception as exc:
+                    print(f"Row {index} generated an exception: {exc}")
+                    embeddings[index] = None  # Handle failed requests if necessary
 
-            categories = ""
-            col_val = json.loads(row['genres'].replace("'", '"'))
-            for category in col_val:
-                categories += f" {category['name']}"
-
-            total_title_tokens += num_tokens_from_string(str(row['title']) + " " + categories)
-            total_overview_tokens += num_tokens_from_string(str(row['overview']))
-
-            # Concatenate 'title' and 'overview' with a space in between
-            concatenated_text = str(row['title']) + " " + str(row['overview']) + " " + categories
-
-            # Generate embedding for the concatenated text
-            # This is a placeholder; you'll need to adapt it to your actual model's API
-            embedding = get_embedding(concatenated_text)
-            #print(len(embedding))
-
-            # Append the generated embedding to the list
-            embeddings.append(embedding)
-
-        # Convert the list of embeddings to a pandas Series and assign it as a new column in the DataFrame
+        # After collecting all embeddings, filter out None values if any rows were skipped
+        #embeddings = [emb for emb in embeddings if emb is not None]
         df['embeddings'] = embeddings
-
-        # Save the DataFrame with embeddings to a file
         df.to_pickle(file_name)
-
-        # Set df_with_embeddings to the modified df
         df_with_embeddings = df
 
     combined_total_tokens = total_title_tokens + total_overview_tokens
-
-    # End time
     end_time = time.time()
-
-    # Calculate duration
-    duration = end_time - start_time
-
-    print(f"The operation took {duration} seconds.")
-
-    print(f"Title count : {total_title_tokens}")
-    print(f"Overview count : {total_overview_tokens}")
-    print(f"Total count : {combined_total_tokens}")
+    print(f"The operation took {end_time - start_time} seconds.")
+    print(f"Title count: {total_title_tokens}, Overview count: {total_overview_tokens}, Total count: {combined_total_tokens}")
 
     return df_with_embeddings
 
 
-df = parser.read_df_from_csv()
-#count_tokens(df)
-df_2 = df[:2]
+# df = parser.read_df_from_csv()
+# #count_tokens(df)
+# df_2 = df[:2]
 # df_w_embeddings = create_embeddings(df)
-count_tokens(df)
 # print(df_w_embeddings)
