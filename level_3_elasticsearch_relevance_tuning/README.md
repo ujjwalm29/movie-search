@@ -697,4 +697,7 @@ Question is, does anything like this exist for search?
 
 Creating a test framework for search is a little tricky in comparison to software test frameworks. The main issue is that, in most cases, a computer cannot judge whether the search is good or not. We need human input at some stage.
 
+As per my research, a tool called [Quepid](https://quepid.com/) can help us in avoiding search regressions.
+One issue I see is that the online version requires a deployed instance of Elasticsearch/solr. I am going to try to self host it. More on this later!
+
 

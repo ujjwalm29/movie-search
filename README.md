@@ -55,8 +55,11 @@ Let's dive into the levels:
   - Semantic search
   - cosine similarity
   - embedding models, sentence-transformers, huggingface, MTEB
-- **Level 5:** Hybrid search and RRF using Elasticsearch(coming soon) 
-- **Level 6:** Knowledge Graphs(coming soon)
+- **Level 5:** [Embeddings through APIs and Matryoshka representation learning powered embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_5_openai_embeddings_MRL)
+  - Advantages and disadvantages of embeddings through APIs.
+  - Why MRL-powered embeddings are game changers.
+- **Level 6:** Hybrid search and RRF using Elasticsearch(coming soon) 
+- **Level 7:** Knowledge Graphs(coming soon)
 
 ## Contributing and Feedback
 

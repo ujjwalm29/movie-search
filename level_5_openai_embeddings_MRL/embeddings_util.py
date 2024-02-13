@@ -71,8 +71,6 @@ def get_embedding_for_row(row):
 
 def create_embeddings(df, file_name='df_with_openai_embeddings.pkl'):
     start_time = time.time()
-    total_title_tokens = 0
-    total_overview_tokens = 0
 
     if os.path.isfile(file_name):
         df_with_embeddings = pd.read_pickle(file_name)
@@ -95,16 +93,12 @@ def create_embeddings(df, file_name='df_with_openai_embeddings.pkl'):
                     print(f"Row {index} generated an exception: {exc}")
                     embeddings[index] = None  # Handle failed requests if necessary
 
-        # After collecting all embeddings, filter out None values if any rows were skipped
-        #embeddings = [emb for emb in embeddings if emb is not None]
         df['embeddings'] = embeddings
         df.to_pickle(file_name)
         df_with_embeddings = df
 
-    combined_total_tokens = total_title_tokens + total_overview_tokens
     end_time = time.time()
     print(f"The operation took {end_time - start_time} seconds.")
-    print(f"Title count: {total_title_tokens}, Overview count: {total_overview_tokens}, Total count: {combined_total_tokens}")
 
     return df_with_embeddings
 

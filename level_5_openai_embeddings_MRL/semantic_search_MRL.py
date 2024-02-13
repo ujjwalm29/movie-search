@@ -14,7 +14,7 @@ def get_dataframe_from_file(file_name: str):
         print("File does not exist")
         return
 
-    # Filter rows where 'embeddings' is not None directly without looping
+    # Filter rows where 'embeddings' is not None
     final_df = df_with_embeddings[df_with_embeddings['embeddings'].notnull()]
 
     return final_df
@@ -60,7 +60,7 @@ def search_and_rank_with_MRL(query, df):
     query_embedding = get_embedding(query)
     query_embedding_arr_short = np.array(normalize_l2(query_embedding[:256]))
 
-
+    # Phase 1
     # Convert the 'embeddings' column back to numpy array
     df_embeddings = np.array(df['normalized_embeddings'].tolist())
 
@@ -70,6 +70,7 @@ def search_and_rank_with_MRL(query, df):
     # Get the indices of the top 20 most similar entries
     top_indices_unranked = np.argsort(similarities)[::-1][:20]
 
+    # Phase 2
     top_unranked_embeddings = np.array(df.iloc[top_indices_unranked]['embeddings'].tolist())
     refined_similarities = cosine_similarity(np.array(query_embedding).reshape(1, -1), top_unranked_embeddings).flatten()
 
@@ -112,6 +113,9 @@ df_w_embeddings = get_dataframe_from_file("../df_with_openai_embeddings.pkl")
 print(len(df_w_embeddings))
 
 df_w_short_embedding = get_short_embeddings(df_w_embeddings)
+
+# One initial random search to load everything into memory
+print(f"Results : {search_and_rank_without_MRL('scary movie', df_w_embeddings)}\n")
 
 print(f"Results : {search_and_rank_with_MRL('the godfather', df_w_embeddings)}\n")
 print(f"Results : {search_and_rank_with_MRL('godfather', df_w_embeddings)}\n")
