@@ -56,6 +56,7 @@ Let's dive into the levels:
   - cosine similarity
   - embedding models, sentence-transformers, huggingface, MTEB
 - **Level 5:** [Embeddings through APIs and Matryoshka representation learning powered embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_5_openai_embeddings_MRL)
+  - Medium article - [LINK](https://ujjwalm29.medium.com/matryoshka-representation-learning-a-guide-to-faster-semantic-search-1c9025543530)
   - Advantages and disadvantages of embeddings through APIs.
   - Why MRL-powered embeddings are game changers.
 - **Level 6:** Hybrid search and RRF using Elasticsearch(coming soon) 
