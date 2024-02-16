@@ -60,11 +60,13 @@ def get_embedding_for_row(row):
     Generate embedding for a single row.
     """
     categories = ""
-    col_val = json.loads(row['genres'].replace("'", '"'))
-    for category in col_val:
-        categories += f" {category['name']}"
-    concatenated_text = str(row['title']) + " " + str(row['overview']) + " " + categories
-    return get_embedding(concatenated_text)
+    if row['vote_average'] >= 6.5 and row['original_language'] == "en":
+        col_val = json.loads(row['genres'].replace("'", '"'))
+        for category in col_val:
+            categories += f" {category['name']}"
+        concatenated_text = str(row['title']) + " " + str(row['overview']) + " " + categories
+        return get_embedding(concatenated_text)
+    return None
 
 
 def create_embeddings(df, file_name='df_with_openai_embeddings.pkl'):

@@ -108,7 +108,7 @@ def get_short_embeddings(df_w_embeddings):
     return df_w_embeddings
 
 
-df_w_embeddings = get_dataframe_from_file("../df_with_openai_embeddings.pkl")
+df_w_embeddings = get_dataframe_from_file("../df_with_openai_embeddings_full.pkl")
 
 print(len(df_w_embeddings))
 
