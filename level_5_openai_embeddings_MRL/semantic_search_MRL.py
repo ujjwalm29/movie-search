@@ -1,27 +1,11 @@
-import os
-import pandas as pd
 import time
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from embeddings_util import get_embedding
-
-
-def get_dataframe_from_file(file_name: str):
-    if os.path.isfile(file_name):
-        # Load DataFrame from the file
-        df_with_embeddings = pd.read_pickle(file_name)
-    else:
-        print("File does not exist")
-        return
-
-    # Filter rows where 'embeddings' is not None
-    final_df = df_with_embeddings[df_with_embeddings['embeddings'].notnull()]
-
-    return final_df
+from scripts import parser
 
 
 def search_and_rank_without_MRL(query, df):
-    start_time = time.time()
 
     print(f"Search query : {query}")
     # Generate the embedding for the query
@@ -32,6 +16,7 @@ def search_and_rank_without_MRL(query, df):
     # Convert the 'embeddings' column back to numpy array
     df_embeddings = np.array(df['embeddings'].tolist())
 
+    start_time = time.time()
     # Calculate similarities (cosine similarity)
     similarities = cosine_similarity(query_embedding_arr.reshape(1, -1), df_embeddings).flatten()
 
@@ -53,7 +38,6 @@ def search_and_rank_without_MRL(query, df):
 
 
 def search_and_rank_with_MRL(query, df):
-    start_time = time.time()
 
     print(f"Search query : {query}")
     # Generate the embedding for the query
@@ -64,6 +48,7 @@ def search_and_rank_with_MRL(query, df):
     # Convert the 'embeddings' column back to numpy array
     df_embeddings = np.array(df['normalized_embeddings'].tolist())
 
+    start_time = time.time()
     # Calculate similarities (cosine similarity)
     similarities = cosine_similarity(query_embedding_arr_short.reshape(1, -1), df_embeddings).flatten()
 
@@ -108,7 +93,7 @@ def get_short_embeddings(df_w_embeddings):
     return df_w_embeddings
 
 
-df_w_embeddings = get_dataframe_from_file("../df_with_openai_embeddings_full.pkl")
+df_w_embeddings = parser.get_dataframe_from_pkl_file("../df_with_openai_embeddings_full.pkl")
 
 print(len(df_w_embeddings))
 

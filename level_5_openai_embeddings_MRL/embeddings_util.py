@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 import os
 import tiktoken
-from scripts import parser
+import shelve
 import json
 import pandas as pd
 import time
@@ -14,8 +14,24 @@ client = OpenAI(api_key=os.getenv("API_KEY"))
 
 
 def get_embedding(text, model="text-embedding-3-small"):
+    # Normalize the text to ensure consistency in caching
     text = text.replace("\n", " ")
-    return client.embeddings.create(input=[text], model=model).data[0].embedding
+
+    # Specify the filename for the shelve database
+    db_filename = 'embeddings_cache'
+
+    with shelve.open(db_filename) as db:
+        # Check if the embedding for the text is already cached
+        if text in db:
+            # Retrieve the embedding from the cache
+            embedding = db[text]
+        else:
+            # Generate the embedding using the client
+            embedding = client.embeddings.create(input=[text], model=model).data[0].embedding
+            # Store the new embedding in the cache for future use
+            db[text] = embedding
+
+    return embedding
 
 
 def num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> int:
