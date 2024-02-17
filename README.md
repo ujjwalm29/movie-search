@@ -58,9 +58,13 @@ Let's dive into the levels:
 - **Level 5:** [Embeddings through APIs and Matryoshka representation learning powered embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_5_openai_embeddings_MRL)
   - Medium article - [LINK](https://ujjwalm29.medium.com/matryoshka-representation-learning-a-guide-to-faster-semantic-search-1c9025543530)
   - Advantages and disadvantages of embeddings through APIs.
-  - Why MRL-powered embeddings are game changers.
-- **Level 6:** Hybrid search and RRF using Elasticsearch(coming soon) 
-- **Level 7:** Knowledge Graphs(coming soon)
+  - Why Matryoshka Representation embeddings are game changers.
+- **Level 6.1:** Inverted File Index(IVF), Product Quantization(PQ), Optimized Product Quantization(OPQ), IVFOPQ
+  - Use faiss to create indexes using the above techniques.
+  - autofaiss
+- **Level 6.2:** HNSW
+- Hybrid search and RRF using Elasticsearch(coming soon) 
+- Knowledge Graphs(coming soon)
 
 ## Contributing and Feedback
 
