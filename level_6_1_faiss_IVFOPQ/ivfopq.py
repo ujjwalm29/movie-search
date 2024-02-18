@@ -113,7 +113,7 @@ def get_OPQ_index(df, m=8, bits=8):
     return index
 
 
-def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
+def get_IVFPQ_index(df, m=8, nlist=100, bits=8):
     embedding_dim = len(df.iloc[0]['embeddings'])
 
     start_time = time.time()
@@ -125,14 +125,36 @@ def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
     # Create a coarse quantizer for the IVF structure
     quantizer = faiss.IndexFlatIP(embedding_dim)  # Use IndexFlatL2 for L2 metric
 
-    # Create a PQ index with the given parameters
-    #pq = faiss.IndexPQ(embedding_dim, m, bits, faiss.METRIC_INNER_PRODUCT)
-
-    # Wrap the PQ index with OPQ for optimized quantization
-    opq = faiss.OPQMatrix(embedding_dim, m)
-
     # Combine OPQ and PQ with the IVF quantizer to create an IVFOPQ index
     index = faiss.IndexIVFPQ(quantizer, embedding_dim, nlist, m, bits, faiss.METRIC_INNER_PRODUCT)
+
+    embeddings_matrix = np.stack(df['embeddings'].values).astype('float32')
+
+    # Train the index
+    index.train(embeddings_matrix)
+
+    # Add embeddings to the index
+    index.add(embeddings_matrix)
+
+    # Calculate duration
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f"The index creation took {duration} seconds.")
+
+    return index
+
+
+
+def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
+    embedding_dim = len(df.iloc[0]['embeddings'])
+
+    start_time = time.time()
+
+    # m is Number of sub-vector quantizers
+    # nlist is the number of clusters for the coarse quantizer
+    # bits is Number of bits per sub-vector quantizer
+
+    index = faiss.index_factory(embedding_dim, f"OPQ{m},IVF{nlist},PQ{m}x{bits}", faiss.METRIC_INNER_PRODUCT)
 
     embeddings_matrix = np.stack(df['embeddings'].values).astype('float32')
 
@@ -178,6 +200,9 @@ df = parser.get_dataframe_from_pkl_file("../df_with_openai_embeddings_full.pkl")
 
 # index_opq = get_OPQ_index(df, 64, 8)
 # do_searches(df, index_opq)
+
+# index_ivfpq = get_IVFPQ_index(df, 64, 100, 8)
+# do_searches(df, index_ivfpq)
 
 index_ivfopq = get_IVFOPQ_index(df, 64, 100, 8)
 do_searches(df, index_ivfopq)

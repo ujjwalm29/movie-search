@@ -361,15 +361,13 @@ This is great! The results are good for all the queries. The optimization proces
 
 Now, let's move on to IVFOPQ
 
-## IVFOPQ in faiss
+## IVFPQ in faiss
 
-In IVFOPQ, we will first create an IVF. Then, we will apply OPQ to our data. This should make our queries faster. 
-
-Let's try to create OPQ indexes using faiss.
+In IVFPQ, we will first create an IVF. Then, we will apply PQ to our data. This should make our queries faster.
 
 Code :
 ```
-def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
+def get_IVFPQ_index(df, m=8, nlist=100, bits=8):
     embedding_dim = len(df.iloc[0]['embeddings'])
 
     start_time = time.time()
@@ -381,23 +379,13 @@ def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
     # Create a coarse quantizer for the IVF structure
     quantizer = faiss.IndexFlatIP(embedding_dim)  # Use IndexFlatL2 for L2 metric
 
-    # Create a PQ index with the given parameters
-    #pq = faiss.IndexPQ(embedding_dim, m, bits, faiss.METRIC_INNER_PRODUCT)
-
-    # Wrap the PQ index with OPQ for optimized quantization
-    opq = faiss.OPQMatrix(embedding_dim, m)
-
     # Combine OPQ and PQ with the IVF quantizer to create an IVFOPQ index
     index = faiss.IndexIVFPQ(quantizer, embedding_dim, nlist, m, bits, faiss.METRIC_INNER_PRODUCT)
 
     embeddings_matrix = np.stack(df['embeddings'].values).astype('float32')
 
-    # Since we're using METRIC_INNER_PRODUCT, ensure embeddings are normalized
-    faiss.normalize_L2(embeddings_matrix)
-
     # Train the index
-    if not index.is_trained:
-        index.train(embeddings_matrix)
+    index.train(embeddings_matrix)
 
     # Add embeddings to the index
     index.add(embeddings_matrix)
@@ -435,38 +423,79 @@ The operation took 0.0001239776611328125 seconds.
 ['The Flying Man', 'A Flying Jatt', 'Superhero Movie', 'Up, Up, and Away', 'Sky High', 'Phantom Boy', 'American Hero', 'The Return of Captain Invincible', 'The Invincible Iron Man', 'The Meteor Man']
 ```
 
-Results are good, but something is sus. The "godfather" query results don't seem to be upto the mark as the OPQ results, even though parameters are the same.
-Also, why is the index creation time so low? Logic says creating IVFOPQ index should take time > time taken to create OPQ(am I missing something)?
+Results are fast! The "godfather" query results don't seem to be upto the mark as the OPQ results, even though parameters are the same.
 
-Turns out, the above code was good for IVFPQ only. I checked the docs(not clear) and asked ChatGPT - it says that the optimization is an implicit step. I don't believe it.
+Let's try IVFOPQ!
 
-So I added the transformation(optimization) as a post step to IVFPQ, similar to the OPQ code and hoped for the best. It worked!
+## IVFOPQ in faiss
+
+### faiss - index_factory
+
+faiss has thing called `index_factory`. It allows you to enter a string which defines what kind of index will be created. 
+[This](https://www.pinecone.io/learn/series/faiss/composite-indexes/) link explains index_factory really well. Side note, James Briggs(the author) is the only person who has explained IVFOPQ, HNSW and faiss in detail online. 
+Check out this entire book called Faiss : The missing manual. Also, check out his youtube videos for visual explanations.
+
+Back to `index_factory`. An interesting experiment is mentioned in the article. Create the same index using a predefined function and create one using `index_factory`. 
+Compare the outputs. If they are the same, congrats! you know how to use `index_factory`.
+
+Let's use `index_factory` to create IVFOPQ index.
+```
+def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
+    embedding_dim = len(df.iloc[0]['embeddings'])
+
+    start_time = time.time()
+
+    # m is Number of sub-vector quantizers
+    # nlist is the number of clusters for the coarse quantizer
+    # bits is Number of bits per sub-vector quantizer
+
+    index = faiss.index_factory(embedding_dim, f"OPQ{m},IVF{nlist},PQ{m}x{bits}", faiss.METRIC_INNER_PRODUCT)
+
+    embeddings_matrix = np.stack(df['embeddings'].values).astype('float32')
+
+    opq = faiss.OPQMatrix(embedding_dim, m)
+    index = faiss.IndexPreTransform(opq, index)
+
+    # Since we're using METRIC_INNER_PRODUCT, ensure embeddings are normalized
+    faiss.normalize_L2(embeddings_matrix)
+
+    # Train the index
+    index.train(embeddings_matrix)
+
+    # Add embeddings to the index
+    index.add(embeddings_matrix)
+
+    # Calculate duration
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f"The index creation took {duration} seconds.")
+
+    return index
+```
 
 Results :
 ```
-The index creation took 788.1183068752289 seconds.
+The index creation took 789.4752860069275 seconds.
 
 Search query : the godfather
-The operation took 0.0004978179931640625 seconds.
-['The Godfather Trilogy: 1972-1990', 'The Godfather: Part III', 'The Godfather: Part II', 'The Godfather', 'The Last Godfather', 'Counselor at Crime', 'Street People', 'The New Godfathers', 'The Brotherhood', 'Pay or Die!']
+The operation took 0.0006871223449707031 seconds.
+['The Godfather Trilogy: 1972-1990', 'The Godfather: Part II', 'The Godfather: Part III', 'The Godfather', 'The Last Godfather', 'The New Godfathers', 'Counselor at Crime', 'Mafioso', 'Pay or Die!', 'Donnie Brasco']
 
 Search query : godfather
-The operation took 0.0006620883941650391 seconds.
-['Counselor at Crime', 'The Last Godfather', 'Street People', 'House of Strangers', 'The Godfather: Part III', 'The Godfather', 'The Godfather Trilogy: 1972-1990', 'Gotti', 'The Mobfathers', "Jane Austen's Mafia!"]
+The operation took 0.00046324729919433594 seconds.
+['Counselor at Crime', 'The Last Godfather', 'House of Strangers', 'The Godfather: Part III', 'The Godfather', 'Street People', 'Mafioso', 'The Godfather: Part II', 'Gotti', 'The Godfather Trilogy: 1972-1990']
 
 Search query : God father
-The operation took 0.00033092498779296875 seconds.
-['Walter', 'The Little Devil', 'On Earth as It Is in Heaven', 'Oedipus Rex', 'Abraham', 'The God of Cookery', 'OMG: Oh My God!', 'Son of God', 'Barabbas', 'Romulus, My Father']
+The operation took 0.0003600120544433594 seconds.
+['Walter', 'The Little Devil', 'Romulus, My Father', 'The God of Cookery', 'There Be Dragons', 'Alleluja & Sartana Are Sons... Sons of God', 'On Earth as It Is in Heaven', 'The Brand New Testament', 'Son of God', 'Abraham']
 
 Search query : Man of Steel
-The operation took 0.0003662109375 seconds.
-['Man of Steel', 'The Mad Scientist', 'Batman v Superman: Dawn of Justice', 'Atom Man vs Superman', 'Superman II', "It's A Bird, It's A Plane, It's Superman!", 'Superman Returns', 'Superman vs. The Elite', 'Superman', 'Supersonic Man']
+The operation took 0.0005257129669189453 seconds.
+['Man of Steel', "It's A Bird, It's A Plane, It's Superman!", 'Batman v Superman: Dawn of Justice', 'Superman', 'Superman II', 'The Mad Scientist', 'Atom Man vs Superman', 'Superman III', 'Superman Returns', 'Superman vs. The Elite']
 
 Search query : flying super hero
-The operation took 0.00045228004455566406 seconds.
-['The Flying Man', 'A Flying Jatt', 'Phantom Boy', 'Hero at Large', 'Sky High', 'Superhero Movie', 'Sky Captain and the World of Tomorrow', 'Up, Up, and Away', 'American Hero', 'Last Action Hero']
+The operation took 0.0004222393035888672 seconds.
+['The Flying Man', 'A Flying Jatt', 'Hero at Large', 'Phantom Boy', 'Superheroes', 'Superhero Movie', 'Sky High', 'Up, Up, and Away', 'Sky Captain and the World of Tomorrow', 'LEGO DC Comics Super Heroes: Justice League - Gotham City Breakout']
 ```
-
-Well, the index creation time seems high enough to believe some kind of optimization is happening. 
-BUT! The godfather results still seem not good enough. IVFOPQ should offer more accuracy so I'm not sure what's going on.
-
+ 
+The "godfather" results aren't great. The index creation time seems high enough to believe the vectors are being optimized.
