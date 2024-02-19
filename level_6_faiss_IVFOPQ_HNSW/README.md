@@ -499,3 +499,7 @@ The operation took 0.0004222393035888672 seconds.
 ```
  
 The "godfather" results aren't great. The index creation time seems high enough to believe the vectors are being optimized.
+
+## HNSW
+
+
