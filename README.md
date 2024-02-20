@@ -1,6 +1,6 @@
-# 🚀 Search and Information Retrieval Crash Course
+# 🚀 Information Retrieval and Search relevance Course
 
-Hello and welcome to this crash course on search and information retrieval! 🌎
+Hello and welcome to this crash course on information retrieval and search relevance! 🌎
 
 Search is everywhere. It's an essential part of our lives. Imagine life without Google! 🔍
 
@@ -59,10 +59,9 @@ Let's dive into the levels:
   - Medium article - [LINK](https://ujjwalm29.medium.com/matryoshka-representation-learning-a-guide-to-faster-semantic-search-1c9025543530)
   - Advantages and disadvantages of embeddings through APIs.
   - Why Matryoshka Representation embeddings are game changers.
-- **Level 6.1:** Inverted File Index(IVF), Product Quantization(PQ), Optimized Product Quantization(OPQ), IVFOPQ
+- **Level 6:** Inverted File Index(IVF), Product Quantization(PQ), Optimized Product Quantization(OPQ), IVFOPQ, HNSW
   - Use faiss to create indexes using the above techniques.
   - autofaiss
-- **Level 6.2:** HNSW
 - Hybrid search and RRF using Elasticsearch(coming soon) 
 - Knowledge Graphs(coming soon)
 
