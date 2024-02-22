@@ -26,7 +26,6 @@ I am not an expert in this field, so this means that your feedback is EXTREMELY 
 - [Levels](#levels)
 - [Contributing](#contributing)
 - [Feedback](#feedback)
-- [License](#license)
 
 ## Introduction
 
@@ -55,11 +54,11 @@ Let's dive into the levels:
   - Semantic search
   - cosine similarity
   - embedding models, sentence-transformers, huggingface, MTEB
-- **Level 5:** [Embeddings through APIs and Matryoshka representation learning powered embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_5_openai_embeddings_MRL)
+- **Level 5:** [Embeddings through APIs and Matryoshka representation embeddings](https://github.com/ujjwalm29/movie-search/tree/master/level_5_openai_embeddings_MRL)
   - Medium article - [LINK](https://ujjwalm29.medium.com/matryoshka-representation-learning-a-guide-to-faster-semantic-search-1c9025543530)
   - Advantages and disadvantages of embeddings through APIs.
   - Why Matryoshka Representation embeddings are game changers.
-- **Level 6:** Inverted File Index(IVF), Product Quantization(PQ), Optimized Product Quantization(OPQ), IVFOPQ, HNSW
+- **Level 6:** [Inverted File Index(IVF), Product Quantization(PQ), Optimized Product Quantization(OPQ), IVFOPQ, HNSW](https://github.com/ujjwalm29/movie-search/tree/master/level_6_faiss_IVFOPQ_HNSW)
   - Use faiss to create indexes using the above techniques.
   - autofaiss
 - Hybrid search and RRF using Elasticsearch(coming soon) 
@@ -69,7 +68,4 @@ Let's dive into the levels:
 
 To contribute, open a PR or start a discussion!
 
-## License
-
-Idk to be honest.
 
