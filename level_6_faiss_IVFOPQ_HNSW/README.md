@@ -502,4 +502,72 @@ The "godfather" results aren't great. The index creation time seems high enough 
 
 ## HNSW
 
+HNSW stands for Hierarchical Navigable Small Worlds. A great resource for learning in depth about HNSW(and anything above) is [this pinecone guide](https://www.pinecone.io/learn/series/faiss/hnsw/).
 
+HNSW does retrieval through several stages(hence, the "Hierarchical"). Each level has different levels of nodes. The number of nodes usually increases as we move down levels.
+At each level, the goal is to find the best matching node for the given query vector.
+
+HNSW has great performance WRT to precision but takes up a lot of memory.
+
+Fortunately for us, faiss supports HNSW.
+
+Here's the code : 
+```
+def get_HNSW_index(df, M=32):
+    embedding_dim = len(df.iloc[0]['embeddings'])
+
+    start_time = time.time()
+
+    # m is Number of sub-vector quantizers
+    # bits is Number of bits per sub-vector quantizer
+    index = faiss.IndexHNSWFlat(embedding_dim, M)
+
+    embeddings_matrix = np.stack(df['embeddings'].values)
+
+    index.hnsw.efConstruction = 256
+
+    index.add(embeddings_matrix)
+
+    index.hnsw.efSearch = 128
+
+    # Calculate duration
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f"The index creation took {duration} seconds.")
+
+    return index
+```
+
+`index.hnsw.efConstruction` controls how many connections will be explored for each node during index creation. This does not impact search time, but it impacts index creation time.
+`index.hnsw.efSearch` controls how many connections will be explored for each node during index search. This impacts search time, but it does not impact index creation time.
+
+Let's look at the results : 
+
+```
+The index creation took 29.621247053146362 seconds.
+
+Search query : the godfather
+The operation took 0.001936197280883789 seconds.
+['The Godfather Trilogy: 1972-1990', 'The Godfather: Part III', 'The Godfather: Part II', 'The Godfather', 'The Last Godfather', 'Counselor at Crime', 'The New Godfathers', "Jane Austen's Mafia!", 'Pay or Die!', 'Big Deal on Madonna Street']
+
+Search query : godfather
+The operation took 0.0017919540405273438 seconds.
+['Counselor at Crime', 'The Last Godfather', 'The Godfather Trilogy: 1972-1990', 'The Godfather: Part III', 'The Godfather', 'House of Strangers', 'The Godfather: Part II', 'Street People', 'Gotti', "Jane Austen's Mafia!"]
+
+Search query : God father
+The operation took 0.002006053924560547 seconds.
+['The Father and the Foreigner', 'God Willing', 'Just a Father', 'Oh, God!', "Father's Day", 'God Tussi Great Ho', 'Godfather', 'Walter', 'I Am Your Father', 'Varalaru']
+
+Search query : Man of Steel
+The operation took 0.0017461776733398438 seconds.
+['Man of Steel', 'The Mad Scientist', 'Superman II', 'Superman Returns', "It's A Bird, It's A Plane, It's Superman!", 'Batman v Superman: Dawn of Justice', 'Superman vs. The Elite', 'Atom Man vs Superman', 'Superman III', 'Superman IV: The Quest for Peace']
+
+Search query : flying super hero
+The operation took 0.0016782283782958984 seconds.
+['The Flying Man', 'A Flying Jatt', 'Phantom Boy', 'Sky High', 'Superhero Movie', 'Superheroes', 'American Hero', 'Hero at Large', 'Up, Up, and Away', 'Crumbs']
+```
+
+These results are probably the best amongst when compared to variations of IVFOPQ above.
+Specifically, the results for the query "godfather" seem to contain many results of "the godfather" series, unlike other searches.
+
+HNSW is powerful when high precision searches are required.

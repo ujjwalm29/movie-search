@@ -178,6 +178,31 @@ def get_IVFOPQ_index(df, m=8, nlist=100, bits=8):
     return index
 
 
+def get_HNSW_index(df, M=32):
+    embedding_dim = len(df.iloc[0]['embeddings'])
+
+    start_time = time.time()
+
+    # m is Number of sub-vector quantizers
+    # bits is Number of bits per sub-vector quantizer
+    index = faiss.IndexHNSWFlat(embedding_dim, M)
+
+    embeddings_matrix = np.stack(df['embeddings'].values)
+
+    index.hnsw.efConstruction = 256
+
+    index.add(embeddings_matrix)
+
+    index.hnsw.efSearch = 128
+
+    # Calculate duration
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f"The index creation took {duration} seconds.")
+
+    return index
+
+
 df = parser.get_dataframe_from_pkl_file("../df_with_openai_embeddings_full.pkl")
 
 # index = get_IVF_index(df)
@@ -204,5 +229,5 @@ df = parser.get_dataframe_from_pkl_file("../df_with_openai_embeddings_full.pkl")
 # index_ivfpq = get_IVFPQ_index(df, 64, 100, 8)
 # do_searches(df, index_ivfpq)
 
-index_ivfopq = get_IVFOPQ_index(df, 64, 100, 8)
-do_searches(df, index_ivfopq)
+index_hnsw = get_HNSW_index(df, 32)
+do_searches(df, index_hnsw)

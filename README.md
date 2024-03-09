@@ -1,6 +1,6 @@
-# 🚀 Information Retrieval and Search relevance Course
+# 🚀 The complete guide to information retrieval and search relevance
 
-Hello and welcome to this crash course on information retrieval and search relevance! 🌎
+Hello and welcome to The complete guide to information retrieval and search relevance! 🌎
 
 Search is everywhere. It's an essential part of our lives. Imagine life without Google! 🔍
 
