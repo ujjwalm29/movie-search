@@ -1,4 +1,4 @@
-# 🚀 The complete guide to information retrieval and search relevance
+README.md# 🚀 The complete guide to information retrieval and search relevance
 
 Hello and welcome to The complete guide to information retrieval and search relevance! 🌎
 
@@ -61,8 +61,12 @@ Let's dive into the levels:
 - **Level 6:** [Inverted File Index(IVF), Product Quantization(PQ), Optimized Product Quantization(OPQ), IVFOPQ, HNSW](https://github.com/ujjwalm29/movie-search/tree/master/level_6_faiss_IVFOPQ_HNSW)
   - Use faiss to create indexes using the above techniques.
   - autofaiss
+- **Level 7:** [Query Expansion using Semantic Knowledge Graphs](https://github.com/ujjwalm29/movie-search/tree/master/level_7_query_expansion)
+  - Why do we need query expansion?
+  - How to create semantic knowledge graphs(SKGs) using raw text data
+  - SKGs in Elasticsearch : `significant_text` aggregations
 - Hybrid search and RRF using Elasticsearch(coming soon) 
-- Knowledge Graphs(coming soon)
+
 
 ## Contributing and Feedback
 
