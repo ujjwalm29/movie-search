@@ -1,4 +1,4 @@
-README.md# 🚀 The complete guide to information retrieval and search relevance
+# 🚀 The complete guide to information retrieval and search relevance
 
 Hello and welcome to The complete guide to information retrieval and search relevance! 🌎
 
